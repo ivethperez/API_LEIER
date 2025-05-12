@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "./node_modules/@prisma/client"
 }
 
 datasource db {
@@ -181,8 +182,9 @@ model Usuarios {
   Id                                          Int           @id @default(autoincrement()) @db.SmallInt
   Nombre                                      String        @db.VarChar(250)
   RoleId                                      Int?          @db.SmallInt
-  UsuariosLeier                               String?       @db.VarChar(250)
+  UsuariosLeier                               Boolean?      @default(false) @db.Bit(1)
   Contrase_a                                  String?       @map("Contraseña") @db.VarChar(500)
+  Telefono                                    String?       @db.VarChar(20)
   CreadoFecha                                 DateTime      @db.DateTime(0)
   Almacenes_Almacenes_UsuarioIdToUsuarios     Almacenes[]   @relation("Almacenes_UsuarioIdToUsuarios")
   Almacenes_Almacenes_ModificadoPorToUsuarios Almacenes[]   @relation("Almacenes_ModificadoPorToUsuarios")

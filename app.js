@@ -1,10 +1,13 @@
 require('dotenv').config();
 const express = require('express');
 const { PrismaClient } = require('@prisma/client')
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
-const LoggerMiddleware = require('./middlewares/logger')
-const errorHandler = require('./middlewares/errorHandler')
+const LoggerMiddleware = require('./middlewares/logger');
+const errorHandler = require('./middlewares/errorHandler');
+const authenticateToken = require('./middlewares/auth')
 const fs = require('fs');
 const path = require('path');
 const usersFilePath = path.join(__dirname, 'users.json');
@@ -81,7 +84,7 @@ app.post('/users', (req, res) => {
       if(err) {
         return res.status(500).json({ message: 'Error al escribir el archivo de usuarios' });
       }
-      res.status(201).json({ message: 'Usuario creado', data: newUser });
+      res.status(201).json({ message: 'Usuario creado' });
     });
   });
 });
@@ -135,6 +138,44 @@ app.get('/db-almacenes', async(req,res)=>{
   catch(error){
     res.status(500).json({error: 'Error de conexión'})
   }
+});
+
+app.get('/protected-route', authenticateToken, (req,res) =>{
+  res.send('Esta es una ruta protegida');
+});
+
+app.post('/register', async (req, res) => {
+  const {Nombre, Contrase_a } = req.body;
+  if (!Nombre || !Contrase_a ) {
+    return res.status(400).json({ message: 'La contraseña es obligatoria' });
+  }
+  const hansedPassword = await bcrypt.hash(Contrase_a ,10);
+
+  const newUser  = await prisma.usuarios.create({
+    data:{
+      Nombre,
+      Contrase_a : hansedPassword, 
+      RoleId:1,
+      CreadoFecha : new Date()
+    }
+  });
+      res.status(201).json({ message: 'Usuario creado' });
+});
+
+app.post('/login', async (req,res) =>{
+  const { Contrase_a, Telefono } = req.body;
+  const user = await prisma.usuarios.findFirst({where:{Telefono}});
+
+  if(!user)
+    return res.status(400).json({error:'Invalid telefono o contraseña'});
+  const validatePassword = await bcrypt.compare(Contrase_a , user.Contrase_a);
+
+  if(!validatePassword)
+    return res.status(400).json({error:'Invalid telefono o contraseña'});
+
+  const token = jwt.sign({id: user.Id}, process.env.JWT_SECRET,{expiresIn : '4h'});
+
+  res.json({token});
 });
 
 app.listen(PORT, () => {
