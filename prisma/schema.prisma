@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "./node_modules/@prisma/client"
 }
 
 datasource db {
@@ -136,6 +135,27 @@ model MetodosPago {
   Ventas Ventas[]
 }
 
+model PreciosProducto {
+  Id                                                     Int             @id @default(autoincrement()) @db.SmallInt
+  UnidadMedidaId                                         Int?            @db.SmallInt
+  Cantidad                                               Int             @default(0) @db.SmallInt
+  PrecioUnitario                                         Decimal         @default(0.00) @db.Decimal(18, 2)
+  ProductoId                                             Int             @db.SmallInt
+  CreadoFecha                                            DateTime        @db.DateTime(0)
+  CreadoUsuarioId                                        Int             @db.SmallInt
+  ModificadoFecha                                        DateTime?       @db.DateTime(0)
+  ModificadoUsuarioId                                    Int?            @db.SmallInt
+  Productos                                              Productos       @relation(fields: [ProductoId], references: [Id], onUpdate: Restrict, map: "PreciosProducto_ibfk_1")
+  Usuarios_PreciosProducto_CreadoUsuarioIdToUsuarios     Usuarios        @relation("PreciosProducto_CreadoUsuarioIdToUsuarios", fields: [CreadoUsuarioId], references: [Id], onUpdate: Restrict, map: "PreciosProducto_ibfk_3")
+  Usuarios_PreciosProducto_ModificadoUsuarioIdToUsuarios Usuarios?       @relation("PreciosProducto_ModificadoUsuarioIdToUsuarios", fields: [ModificadoUsuarioId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "PreciosProducto_ibfk_4")
+  UnidadesMedida                                         UnidadesMedida? @relation(fields: [UnidadMedidaId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "PreciosProducto_ibfk_5")
+
+  @@index([CreadoUsuarioId], map: "CreadoUsuarioId")
+  @@index([ModificadoUsuarioId], map: "ModificadoUsuarioId")
+  @@index([UnidadMedidaId], map: "PreciosProducto_ibfk_5")
+  @@index([ProductoId], map: "ProductoId")
+}
+
 model Productos {
   Id                 Int                 @id @default(autoincrement()) @db.SmallInt
   Nombre             String              @db.VarChar(250)
@@ -143,15 +163,19 @@ model Productos {
   Cantidad           Int
   EsPieza            Boolean             @default(dbgenerated("(b'0')")) @db.Bit(1)
   CategoriaId        Int                 @db.SmallInt
+  CreadoFecha        DateTime            @db.DateTime(0)
+  UsuarioId          Int?                @db.SmallInt
   Compras            Compras[]
   ImagenesProductos  ImagenesProductos[]
   Inventario         Inventario[]
   ListasPrecios      ListasPrecios[]
   PreciosProducto    PreciosProducto[]
   CategoriasProducto CategoriasProducto  @relation(fields: [CategoriaId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "Productos_ibfk_1")
+  Usuarios           Usuarios?           @relation(fields: [UsuarioId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "Productos_ibfk_2")
   Ventas             Ventas[]
 
   @@index([CategoriaId], map: "CategoriaId")
+  @@index([UsuarioId], map: "UsuarioId")
 }
 
 model Proveedores {
@@ -194,6 +218,7 @@ model Usuarios {
   Inventario                                                    Inventario[]
   PreciosProducto_PreciosProducto_CreadoUsuarioIdToUsuarios     PreciosProducto[] @relation("PreciosProducto_CreadoUsuarioIdToUsuarios")
   PreciosProducto_PreciosProducto_ModificadoUsuarioIdToUsuarios PreciosProducto[] @relation("PreciosProducto_ModificadoUsuarioIdToUsuarios")
+  Productos                                                     Productos[]
   RolesUSuario                                                  RolesUSuario?     @relation(fields: [RoleId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "Usuarios_ibfk_1")
 
   @@index([RoleId], map: "RoleId")
@@ -216,26 +241,5 @@ model Ventas {
 
   @@index([ClienteId], map: "ClienteId")
   @@index([MetodoPagoId], map: "MetodoPagoId")
-  @@index([ProductoId], map: "ProductoId")
-}
-
-model PreciosProducto {
-  Id                                                     Int             @id @default(autoincrement()) @db.SmallInt
-  UnidadMedidaId                                         Int?            @db.SmallInt
-  Cantidad                                               Int             @default(0) @db.SmallInt
-  PrecioUnitario                                         Decimal         @default(0.00) @db.Decimal(18, 2)
-  ProductoId                                             Int             @db.SmallInt
-  CreadoFecha                                            DateTime        @db.DateTime(0)
-  CreadoUsuarioId                                        Int             @db.SmallInt
-  ModificadoFecha                                        DateTime?       @db.DateTime(0)
-  ModificadoUsuarioId                                    Int?            @db.SmallInt
-  Productos                                              Productos       @relation(fields: [ProductoId], references: [Id], onUpdate: Restrict, map: "PreciosProducto_ibfk_1")
-  Usuarios_PreciosProducto_CreadoUsuarioIdToUsuarios     Usuarios        @relation("PreciosProducto_CreadoUsuarioIdToUsuarios", fields: [CreadoUsuarioId], references: [Id], onUpdate: Restrict, map: "PreciosProducto_ibfk_3")
-  Usuarios_PreciosProducto_ModificadoUsuarioIdToUsuarios Usuarios?       @relation("PreciosProducto_ModificadoUsuarioIdToUsuarios", fields: [ModificadoUsuarioId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "PreciosProducto_ibfk_4")
-  UnidadesMedida                                         UnidadesMedida? @relation(fields: [UnidadMedidaId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "PreciosProducto_ibfk_5")
-
-  @@index([CreadoUsuarioId], map: "CreadoUsuarioId")
-  @@index([ModificadoUsuarioId], map: "ModificadoUsuarioId")
-  @@index([UnidadMedidaId], map: "PreciosProducto_ibfk_5")
   @@index([ProductoId], map: "ProductoId")
 }

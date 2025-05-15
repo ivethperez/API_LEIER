@@ -21,7 +21,7 @@ return prisma.productos.findUnique({
 };
 
 exports.getProducts = async =>{
-    return prisma.productos.findMany({
+    return prisma.Productos.findMany({
         include: {
             CategoriasProducto:{
                 select:{ Nombre:true}}
