@@ -34,10 +34,14 @@ exports.getPriceProducts = async => {
                         select: {
                             URLImagen: true
                         }
-                    }
+                    },
+                    CategoriasProducto:{
+                        select: {
+                            Nombre:true
+                        }
+                    },
                 }
             },
-
             Cantidad: true,
             PrecioUnitario: true,
             UnidadesMedida: {
