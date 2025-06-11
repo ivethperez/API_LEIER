@@ -30,9 +30,11 @@ exports.getPriceProducts = async => {
                     Descripcion: true,
                     Cantidad: true,
                     EsPieza: true,
+                    Activo: true,
                     ImagenesProductos: {
                         select: {
-                            URLImagen: true
+                            URLImagen: true,
+                            Orden: true
                         }
                     },
                     CategoriasProducto:{

@@ -15,7 +15,7 @@ app.use(express.json());
 app.use('/api', routes);
 
 app.get('/', (req,res) =>{
-  res.send('Hola mundo');
+  res.send('Hello World');
 });
 
 module.exports = app;

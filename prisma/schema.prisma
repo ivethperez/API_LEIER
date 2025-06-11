@@ -173,6 +173,7 @@ model Productos {
   CategoriasProducto CategoriasProducto  @relation(fields: [CategoriaId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "Productos_ibfk_1")
   Usuarios           Usuarios?           @relation(fields: [UsuarioId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "Productos_ibfk_2")
   Ventas             Ventas[]
+  Activo             Boolean             @default(dbgenerated("(b'0')")) @db.Bit(1)
 
   @@index([CategoriaId], map: "CategoriaId")
   @@index([UsuarioId], map: "UsuarioId")
@@ -220,6 +221,7 @@ model Usuarios {
   PreciosProducto_PreciosProducto_ModificadoUsuarioIdToUsuarios PreciosProducto[] @relation("PreciosProducto_ModificadoUsuarioIdToUsuarios")
   Productos                                                     Productos[]
   RolesUSuario                                                  RolesUSuario?     @relation(fields: [RoleId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "Usuarios_ibfk_1")
+  Correo                                                        String?           @db.VarChar(250)
 
   @@index([RoleId], map: "RoleId")
 }
