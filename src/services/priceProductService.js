@@ -37,9 +37,9 @@ exports.getPriceProducts = async => {
                             Orden: true
                         }
                     },
-                    CategoriasProducto:{
+                    CategoriasProducto: {
                         select: {
-                            Nombre:true
+                            Nombre: true
                         }
                     },
                 }
@@ -53,7 +53,12 @@ exports.getPriceProducts = async => {
                     Nombre: true
                 }
             },
-        }
+        },
+        orderBy: {
+            Productos: {
+                EsPieza: 'desc', // o 'asc' si prefieres que las piezas vayan al final
+            },
+        },
     });
 };
 
