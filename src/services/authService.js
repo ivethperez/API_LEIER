@@ -16,14 +16,14 @@ const registerUser = async (Nombre, Contrase_a, Telefono) => {
   return newUser;
 };
 
-const loginUser = async (Telefono, Contrase_a) => {
-  const user = await prisma.Usuarios.findFirst({ where: { Telefono } });
+const loginUser = async (Correo, Contrase_a) => {
+  const user = await prisma.Usuarios.findFirst({ where: { Correo } });
   if (!user) {
-    throw new Error('Invalido telefono o contraseña');
+    throw new Error('Invalido correo o contraseña');
   }
   const validPassword = await bcrypt.compare(Contrase_a, user.Contrase_a);
   if (!validPassword) {
-    throw new Error('Invalido telefono o contraseña');
+    throw new Error('Invalido correo o contraseña');
   }
   const token = jwt.sign(
     { id: user.id, role: user.role },

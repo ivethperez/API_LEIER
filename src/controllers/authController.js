@@ -12,8 +12,9 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { Telefono, Contrase_a } = req.body;
-    const token = await loginUser(Telefono, Contrase_a);
+    const { Correo, Contrase_a } = req.body;
+    const token = await loginUser(Correo, Contrase_a);
+    console.log(token);
     return res.json({ token });
   } catch (error) {
     return res.status(400).json({ error: error.message });
