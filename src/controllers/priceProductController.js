@@ -64,3 +64,17 @@ exports.deletePriceProduct = async (req, res) => {
         return res.status(400).json({ error: error.message });
     }
 }
+
+exports.getByProductAndUnit = async (req, res) => {
+    try {
+        const priceProduct = await priceProductService.getByProductAndUnit (req.params.productId, req.params.unitOfMeasureId);
+        if (!priceProduct) {
+            return res.status(404).json({ error: 'Price product not fount' });
+        }
+        res.json(priceProduct);
+
+    }
+    catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+}

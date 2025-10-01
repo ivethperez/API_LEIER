@@ -2,78 +2,84 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 exports.createPriceProduct = async data => {
-    const conflict = await prisma.preciosProducto.findFirst({
+    const conflict = await prisma.productPrice.findFirst({
         where: {
-            Id: data.Id
+            id: data.id
         }
     });
     if (conflict) {
         throw new Error('El precio del producto ya se encuentra registrado');
     }
-    return prisma.preciosProducto.create({ data });
+    return prisma.productPrice.create({ data });
 }
 
-exports.getPriceProduct = (id) => {
-    return prisma.PreciosProducto.findUnique({
-        where: { Id: parseInt(id, 10) }
+exports.getPriceProduct = async (id) => {
+    return prisma.productPrice.findUnique({
+        where: { id: parseInt(id, 10) }
+    });
+};
+
+exports.getByProductAndUnit = (productId, unitOfMeasureId) => {
+    return prisma.productPrice.findFirst({
+        where: { productId: parseInt(productId, 10), unitOfMeasureId : parseInt(unitOfMeasureId,10) }
     });
 };
 
 exports.getPriceProducts = async => {
-    return prisma.PreciosProducto.findMany({
-
+    return prisma.productPrice.findMany({
         select: {
-            Productos: {
+            quantity: true,
+            unitPrice: true,
+            unitOfMeasure: {
                 select: {
-                    Id: true,
-                    Nombre: true,
-                    Descripcion: true,
-                    Cantidad: true,
-                    EsPieza: true,
-                    Activo: true,
-                    ImagenesProductos: {
-                        select: {
-                            URLImagen: true,
-                            Orden: true
-                        }
-                    },
-                    CategoriasProducto: {
-                        select: {
-                            Nombre: true
-                        }
-                    },
-                }
+                    id: true,
+                    code: true,
+                    name: true,
+                },
             },
-            Cantidad: true,
-            PrecioUnitario: true,
-            UnidadesMedida: {
+            product: {
                 select: {
-                    Id: true,
-                    Code: true,
-                    Nombre: true
-                }
+                    id: true,
+                    name: true,
+                    description: true,
+                    quantity: true,
+                    isPiece: true,
+                    active: true,
+                    category: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                    productImage: {
+                        select: {
+                            imageUrl: true,
+                            orderImage: true,
+                        },
+                    },
+                },
             },
+
         },
         orderBy: {
-            Productos: {
-                EsPieza: 'desc', // o 'asc' si prefieres que las piezas vayan al final
+            product: {
+                isPiece: "desc", // 👈 aquí ordenamos por isPiece descendente
             },
         },
     });
 };
 
 exports.updatePriceProduct = async (id, data) => {
-    const conflict = prisma.preciosProducto.findFirst({
+    const conflict = prisma.productPrice.findFirst({
         where: {
-            Id: { not: parseInt(id, 10) }
+            id: { not: parseInt(id, 10) }
         }
     });
     if (conflict) {
         throw new Error('El precio del producto ya se encuentra registrado');
     }
-    return prisma.preciosProducto.update({
+    return prisma.productPrice.update({
         where: {
-            Id: parseInt(id, 10),
+            id: parseInt(id, 10),
             data
         }
     });
@@ -81,9 +87,11 @@ exports.updatePriceProduct = async (id, data) => {
 
 
 exports.deletePriceProduct = (id) => {
-    return prisma.preciosProducto.delete({
+    return prisma.productPrice.delete({
         where: {
-            Id: parseInt(id, 10)
+            id: parseInt(id, 10)
         }
     });
 };
+
+

@@ -7,241 +7,570 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Almacenes {
-  Id                                                    Int          @id @default(autoincrement()) @db.SmallInt
-  Code                                                  String       @db.VarChar(50)
-  Nombre                                                String       @db.VarChar(250)
-  Existencia_bolsas                                     Int
-  Existencia_kg                                         Int
-  CreadoFecha                                           DateTime     @db.DateTime(0)
-  UsuarioId                                             Int          @db.SmallInt
-  FechaModificacion                                     DateTime?    @db.DateTime(0)
-  ModificadoPor                                         Int?         @db.SmallInt
-  Usuarios_Almacenes_UsuarioIdToUsuarios                Usuarios     @relation("Almacenes_UsuarioIdToUsuarios", fields: [UsuarioId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "Almacenes_ibfk_1")
-  Usuarios_Almacenes_ModificadoPorToUsuarios            Usuarios?    @relation("Almacenes_ModificadoPorToUsuarios", fields: [ModificadoPor], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "Almacenes_ibfk_2")
-  Inventario_Inventario_AlmacenActualIdToAlmacenes      Inventario[] @relation("Inventario_AlmacenActualIdToAlmacenes")
-  Inventario_Inventario_SurtidoPorAlmacenIdToAlmacenes  Inventario[] @relation("Inventario_SurtidoPorAlmacenIdToAlmacenes")
-  Inventario_Inventario_RecibidoPorAlmacenIdToAlmacenes Inventario[] @relation("Inventario_RecibidoPorAlmacenIdToAlmacenes")
+model category {
+  id                            Int          @id @default(autoincrement()) @db.SmallInt
+  code                          String       @db.VarChar(50)
+  name                          String       @db.VarChar(150)
+  categoryTypeId                Int          @db.SmallInt
+  active                        Boolean?     @default(true)
+  createdAt                     DateTime     @db.DateTime(0)
+  createdBy                     Int
+  updatedAt                     DateTime?    @db.DateTime(0)
+  updatedBy                     Int?
+  categoryType                  categoryType @relation(fields: [categoryTypeId], references: [id], onUpdate: Restrict, map: "category_ibfk_1")
+  user_category_createdByTouser user         @relation("category_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "category_ibfk_2")
+  user_category_updatedByTouser user?        @relation("category_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "category_ibfk_3")
+  expense                       expense[]
+  product                       product[]
 
-  @@index([UsuarioId], map: "CreadoPor")
-  @@index([ModificadoPor], map: "ModificadoPor")
+  @@index([categoryTypeId], map: "categoryTypeId")
+  @@index([createdBy], map: "createdBy")
+  @@index([updatedBy], map: "updatedBy")
 }
 
-model CategoriasProducto {
-  Id        Int         @id @default(autoincrement()) @db.SmallInt
-  Code      String      @db.VarChar(50)
-  Nombre    String      @db.VarChar(250)
-  Productos Productos[]
+model categoryType {
+  id                                Int        @id @default(autoincrement()) @db.SmallInt
+  code                              String     @db.VarChar(50)
+  name                              String     @db.VarChar(100)
+  createdAt                         DateTime   @db.DateTime(0)
+  createdBy                         Int
+  updatedAt                         DateTime?  @db.DateTime(0)
+  updatedBy                         Int?
+  category                          category[]
+  user_categoryType_createdByTouser user       @relation("categoryType_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "categoryType_ibfk_1")
+  user_categoryType_updatedByTouser user?      @relation("categoryType_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "categoryType_ibfk_2")
+
+  @@index([createdBy], map: "createdBy")
+  @@index([updatedBy], map: "updatedBy")
 }
 
-model Clientes {
-  Id       Int      @id @default(autoincrement()) @db.SmallInt
-  Nombre   String   @db.VarChar(250)
-  Telefono String?  @db.VarChar(250)
-  Ventas   Ventas[]
+model customer {
+  id                            Int       @id @default(autoincrement())
+  name                          String    @db.VarChar(150)
+  lastName                      String?   @db.VarChar(150)
+  phone                         String?   @db.VarChar(20)
+  email                         String?   @db.VarChar(150)
+  address                       String?   @db.VarChar(255)
+  active                        Boolean?  @default(true)
+  createdAt                     DateTime  @db.DateTime(0)
+  createdBy                     Int
+  updatedAt                     DateTime? @db.DateTime(0)
+  updatedBy                     Int?
+  user_customer_createdByTouser user      @relation("customer_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "customer_ibfk_1")
+  user_customer_updatedByTouser user?     @relation("customer_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "customer_ibfk_2")
+  po                            po[]
+  sale                          sale[]
+
+  @@index([createdBy], map: "createdBy")
+  @@index([updatedBy], map: "updatedBy")
 }
 
-model Compras {
-  Id               Int          @id @default(autoincrement()) @db.SmallInt
-  Folio            String       @db.VarChar(250)
-  TipoCompraId     Int          @db.SmallInt
-  ProveedorId      Int          @db.SmallInt
-  ProductoId       Int?         @db.SmallInt
-  InsumoId         Int?         @db.SmallInt
-  Cantidad         Int
-  CantidadRecibida Int
-  CostoUnitario    Decimal      @db.Decimal(10, 0)
-  PrecioUnitario   Decimal      @db.Decimal(10, 0)
-  FechaRecepcion   DateTime     @db.DateTime(0)
-  CreadoFecha      DateTime     @db.DateTime(0)
-  TiposCompra      TiposCompra  @relation(fields: [TipoCompraId], references: [Id], onUpdate: Restrict, map: "Compras_ibfk_1")
-  Proveedores      Proveedores  @relation(fields: [ProveedorId], references: [Id], onUpdate: Restrict, map: "Compras_ibfk_2")
-  Productos        Productos?   @relation(fields: [ProductoId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "Compras_ibfk_3")
-  Insumos          Insumos?     @relation(fields: [InsumoId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "Compras_ibfk_4")
-  Inventario       Inventario[]
+model expense {
+  id                           Int              @id @default(autoincrement())
+  name                         String           @db.VarChar(150)
+  categoryId                   Int              @db.SmallInt
+  expenseTypeId                Int              @db.SmallInt
+  active                       Boolean?         @default(true)
+  createdAt                    DateTime         @db.DateTime(0)
+  createdBy                    Int
+  updatedAt                    DateTime?        @db.DateTime(0)
+  updatedBy                    Int?
+  category                     category         @relation(fields: [categoryId], references: [id], onUpdate: Restrict, map: "expense_ibfk_1")
+  expenseType                  expenseType      @relation(fields: [expenseTypeId], references: [id], onUpdate: Restrict, map: "expense_ibfk_2")
+  user_expense_createdByTouser user             @relation("expense_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "expense_ibfk_3")
+  user_expense_updatedByTouser user?            @relation("expense_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "expense_ibfk_4")
+  purchaseDetail               purchaseDetail[]
+  warehouseStock               warehouseStock[]
 
-  @@index([InsumoId], map: "InsumoId")
-  @@index([ProductoId], map: "ProductoId")
-  @@index([ProveedorId], map: "ProveedorId")
-  @@index([TipoCompraId], map: "TipoCompraId")
+  @@index([createdBy], map: "createdBy")
+  @@index([expenseTypeId], map: "expenseTypeId")
+  @@index([categoryId], map: "expense_ibfk_1")
+  @@index([updatedBy], map: "updatedBy")
 }
 
-model ImagenesProductos {
-  Id         Int       @id @default(autoincrement()) @db.SmallInt
-  URLImagen  String?   @db.VarChar(500)
-  Orden      Int?      @db.SmallInt
-  ProductoId Int       @db.SmallInt
-  Productos  Productos @relation(fields: [ProductoId], references: [Id], onUpdate: Restrict, map: "ImagenesProductos_ibfk_1")
+model expenseType {
+  id                               Int       @id @default(autoincrement()) @db.SmallInt
+  code                             String    @db.VarChar(50)
+  name                             String    @db.VarChar(150)
+  active                           Boolean?  @default(true)
+  createdAt                        DateTime  @db.DateTime(0)
+  createdBy                        Int
+  updatedAt                        DateTime? @db.DateTime(0)
+  updatedBy                        Int?
+  expense                          expense[]
+  user_expenseType_createdByTouser user      @relation("expenseType_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "expenseType_ibfk_1")
+  user_expenseType_updatedByTouser user?     @relation("expenseType_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "expenseType_ibfk_2")
 
-  @@index([ProductoId], map: "ProductoId")
+  @@index([createdBy], map: "createdBy")
+  @@index([updatedBy], map: "updatedBy")
 }
 
-model Insumos {
-  Id               Int       @id @default(autoincrement()) @db.SmallInt
-  Nombre           String    @db.VarChar(250)
-  Descripcion      String?   @db.VarChar(500)
-  Cantidad         Int
-  CantidadRecibida Int?
-  CostoUnitario    Decimal   @db.Decimal(10, 4)
-  Compras          Compras[]
+model paymentMethod {
+  id                                 Int       @id @default(autoincrement()) @db.SmallInt
+  code                               String    @db.VarChar(50)
+  name                               String    @db.VarChar(250)
+  active                             Boolean?  @default(true)
+  createdAt                          DateTime  @db.DateTime(0)
+  createdBy                          Int
+  updatedAt                          DateTime? @db.DateTime(0)
+  updatedBy                          Int?
+  user_paymentMethod_createdByTouser user      @relation("paymentMethod_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "paymentMethod_ibfk_1")
+  user_paymentMethod_updatedByTouser user?     @relation("paymentMethod_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "paymentMethod_ibfk_2")
+  po                                 po[]
+  sale                               sale[]
+
+  @@index([createdBy], map: "createdBy")
+  @@index([updatedBy], map: "updatedBy")
 }
 
-model Inventario {
-  Id                                                   Int       @id @default(autoincrement()) @db.SmallInt
-  CompraId                                             Int       @db.SmallInt
-  ProductoId                                           Int       @db.SmallInt
-  CantidadRecibida                                     Int       @db.SmallInt
-  AlmacenActualId                                      Int       @db.SmallInt
-  FechaSurtido                                         DateTime  @db.DateTime(0)
-  SurtidoPorAlmacenId                                  Int       @db.SmallInt
-  RecibidoPorAlmacenId                                 Int       @db.SmallInt
-  CreadoFecha                                          DateTime  @db.DateTime(0)
-  CreadoPor                                            Int       @db.SmallInt
-  Compras                                              Compras   @relation(fields: [CompraId], references: [Id], onUpdate: Restrict, map: "Inventario_ibfk_1")
-  Productos                                            Productos @relation(fields: [ProductoId], references: [Id], onUpdate: Restrict, map: "Inventario_ibfk_2")
-  Almacenes_Inventario_AlmacenActualIdToAlmacenes      Almacenes @relation("Inventario_AlmacenActualIdToAlmacenes", fields: [AlmacenActualId], references: [Id], onUpdate: Restrict, map: "Inventario_ibfk_3")
-  Almacenes_Inventario_SurtidoPorAlmacenIdToAlmacenes  Almacenes @relation("Inventario_SurtidoPorAlmacenIdToAlmacenes", fields: [SurtidoPorAlmacenId], references: [Id], onUpdate: Restrict, map: "Inventario_ibfk_4")
-  Almacenes_Inventario_RecibidoPorAlmacenIdToAlmacenes Almacenes @relation("Inventario_RecibidoPorAlmacenIdToAlmacenes", fields: [RecibidoPorAlmacenId], references: [Id], onUpdate: Restrict, map: "Inventario_ibfk_5")
-  Usuarios                                             Usuarios  @relation(fields: [CreadoPor], references: [Id], onUpdate: Restrict, map: "Inventario_ibfk_6")
+model po {
+  id                      Int           @id @default(autoincrement())
+  folio                   String        @db.VarChar(150)
+  customerId              Int
+  paymentMethodId         Int           @db.SmallInt
+  totalAmount             Decimal       @db.Decimal(10, 2)
+  statusPoId              Int           @db.SmallInt
+  orderDate               DateTime      @db.DateTime(0)
+  deliveryDate            DateTime?     @db.DateTime(0)
+  warehouseId             Int           @db.SmallInt
+  createdAt               DateTime      @db.DateTime(0)
+  createdBy               Int
+  updatedAt               DateTime?     @db.DateTime(0)
+  updatedBy               Int?
+  customer                customer      @relation(fields: [customerId], references: [id], onUpdate: Restrict, map: "po_ibfk_1")
+  paymentMethod           paymentMethod @relation(fields: [paymentMethodId], references: [id], onUpdate: Restrict, map: "po_ibfk_2")
+  statusPo                statusPo      @relation(fields: [statusPoId], references: [id], onUpdate: Restrict, map: "po_ibfk_3")
+  warehouse               warehouse     @relation(fields: [warehouseId], references: [id], onUpdate: Restrict, map: "po_ibfk_5")
+  user_po_createdByTouser user          @relation("po_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "po_ibfk_6")
+  user_po_updatedByTouser user?         @relation("po_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "po_ibfk_7")
+  poDetail                poDetail[]
+  sale                    sale[]
 
-  @@index([AlmacenActualId], map: "AlmacenActualId")
-  @@index([CompraId], map: "CompraId")
-  @@index([CreadoPor], map: "CreadoPor")
-  @@index([ProductoId], map: "ProductoId")
-  @@index([RecibidoPorAlmacenId], map: "RecibidoPorAlmacenId")
-  @@index([SurtidoPorAlmacenId], map: "SurtidoPorAlmacenId")
+  @@index([createdBy], map: "createdBy")
+  @@index([customerId], map: "customerId")
+  @@index([paymentMethodId], map: "paymentMethodId")
+  @@index([statusPoId], map: "statusPoId")
+  @@index([updatedBy], map: "updatedBy")
+  @@index([warehouseId], map: "warehouseId")
 }
 
-model ListasPrecios {
-  Id             Int            @id @default(autoincrement()) @db.SmallInt
-  ProductoId     Int            @db.SmallInt
-  UnidadMedidaId Int            @db.SmallInt
-  CostoUnitario  Decimal        @db.Decimal(10, 0)
-  Utilidad       Decimal        @db.Decimal(10, 0)
-  PrecioUnitario Decimal        @db.Decimal(10, 0)
-  CreadoFecha    DateTime       @db.DateTime(0)
-  Vigente        Boolean        @default(dbgenerated("(b'0')")) @db.Bit(1)
-  Productos      Productos      @relation(fields: [ProductoId], references: [Id], onUpdate: Restrict, map: "ListasPrecios_ibfk_1")
-  UnidadesMedida UnidadesMedida @relation(fields: [UnidadMedidaId], references: [Id], onUpdate: Restrict, map: "ListasPrecios_ibfk_2")
+model poDetail {
+  id                            Int          @id @default(autoincrement())
+  poId                          Int
+  productPriceId                Int
+  quantity                      Int
+  unitPrice                     Decimal      @db.Decimal(10, 2)
+  subtotal                      Decimal      @db.Decimal(10, 2)
+  createdAt                     DateTime     @db.DateTime(0)
+  createdBy                     Int
+  updatedAt                     DateTime?    @db.DateTime(0)
+  updatedBy                     Int?
+  po                            po           @relation(fields: [poId], references: [id], onUpdate: Restrict, map: "poDetail_ibfk_1")
+  user_poDetail_createdByTouser user         @relation("poDetail_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "poDetail_ibfk_4")
+  user_poDetail_updatedByTouser user?        @relation("poDetail_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "poDetail_ibfk_5")
+  productPrice                  productPrice @relation(fields: [productPriceId], references: [id], onUpdate: Restrict, map: "poDetail_ibfk_3")
 
-  @@index([ProductoId], map: "ProductoId")
-  @@index([UnidadMedidaId], map: "UnidadMedidaId")
+  @@index([createdBy], map: "createdBy")
+  @@index([poId], map: "poId")
+  @@index([productPriceId], map: "productPriceId")
+  @@index([updatedBy], map: "updatedBy")
 }
 
-model MetodosPago {
-  Id     Int      @id @default(autoincrement()) @db.SmallInt
-  code   String   @db.VarChar(50)
-  Nombre String   @db.VarChar(250)
-  Ventas Ventas[]
+model priceList {
+  id                             Int            @id @default(autoincrement())
+  Nombre                         String         @db.VarChar(250)
+  supplierId                     Int            @db.SmallInt
+  active                         Boolean?       @default(true)
+  validFrom                      DateTime       @db.Date
+  validTo                        DateTime?      @db.Date
+  createdAt                      DateTime       @db.DateTime(0)
+  createdBy                      Int
+  updatedAt                      DateTime?      @db.DateTime(0)
+  updatedBy                      Int?
+  user_priceList_createdByTouser user           @relation("priceList_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "priceList_ibfk_3")
+  user_priceList_updatedByTouser user?          @relation("priceList_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "priceList_ibfk_4")
+  supplier                       supplier       @relation(fields: [supplierId], references: [id], onUpdate: Restrict, map: "priceList_ibfk_5")
+  productPrice                   productPrice[]
+
+  @@index([createdBy], map: "createdBy")
+  @@index([supplierId], map: "supplierId")
+  @@index([updatedBy], map: "updatedBy")
 }
 
-model PreciosProducto {
-  Id                                                     Int             @id @default(autoincrement()) @db.SmallInt
-  UnidadMedidaId                                         Int?            @db.SmallInt
-  Cantidad                                               Int             @default(0) @db.SmallInt
-  PrecioUnitario                                         Decimal         @default(0.00) @db.Decimal(18, 2)
-  ProductoId                                             Int             @db.SmallInt
-  CreadoFecha                                            DateTime        @db.DateTime(0)
-  CreadoUsuarioId                                        Int             @db.SmallInt
-  ModificadoFecha                                        DateTime?       @db.DateTime(0)
-  ModificadoUsuarioId                                    Int?            @db.SmallInt
-  Productos                                              Productos       @relation(fields: [ProductoId], references: [Id], onUpdate: Restrict, map: "PreciosProducto_ibfk_1")
-  Usuarios_PreciosProducto_CreadoUsuarioIdToUsuarios     Usuarios        @relation("PreciosProducto_CreadoUsuarioIdToUsuarios", fields: [CreadoUsuarioId], references: [Id], onUpdate: Restrict, map: "PreciosProducto_ibfk_3")
-  Usuarios_PreciosProducto_ModificadoUsuarioIdToUsuarios Usuarios?       @relation("PreciosProducto_ModificadoUsuarioIdToUsuarios", fields: [ModificadoUsuarioId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "PreciosProducto_ibfk_4")
-  UnidadesMedida                                         UnidadesMedida? @relation(fields: [UnidadMedidaId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "PreciosProducto_ibfk_5")
+model product {
+  id                           Int              @id @default(autoincrement())
+  name                         String           @db.VarChar(150)
+  description                  String           @db.VarChar(500)
+  quantity                     Int
+  isPiece                      Boolean?         @default(false)
+  categoryId                   Int              @db.SmallInt
+  active                       Boolean?         @default(true)
+  createdAt                    DateTime         @db.DateTime(0)
+  createdBy                    Int
+  updatedAt                    DateTime?        @db.DateTime(0)
+  updatedBy                    Int?
+  category                     category         @relation(fields: [categoryId], references: [id], onUpdate: Restrict, map: "product_ibfk_1")
+  user_product_createdByTouser user             @relation("product_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "product_ibfk_2")
+  user_product_updatedByTouser user?            @relation("product_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "product_ibfk_3")
+  productImage                 productImage[]
+  productPrice                 productPrice[]
+  warehouseStock               warehouseStock[]
 
-  @@index([CreadoUsuarioId], map: "CreadoUsuarioId")
-  @@index([ModificadoUsuarioId], map: "ModificadoUsuarioId")
-  @@index([UnidadMedidaId], map: "PreciosProducto_ibfk_5")
-  @@index([ProductoId], map: "ProductoId")
+  @@index([createdBy], map: "createdBy")
+  @@index([categoryId], map: "product_ibfk_1")
+  @@index([updatedBy], map: "updatedBy")
 }
 
-model Productos {
-  Id                 Int                 @id @default(autoincrement()) @db.SmallInt
-  Nombre             String              @db.VarChar(250)
-  Descripcion        String?             @db.VarChar(500)
-  Cantidad           Int
-  EsPieza            Boolean             @default(dbgenerated("(b'0')")) @db.Bit(1)
-  CategoriaId        Int                 @db.SmallInt
-  CreadoFecha        DateTime            @db.DateTime(0)
-  UsuarioId          Int?                @db.SmallInt
-  Compras            Compras[]
-  ImagenesProductos  ImagenesProductos[]
-  Inventario         Inventario[]
-  ListasPrecios      ListasPrecios[]
-  PreciosProducto    PreciosProducto[]
-  CategoriasProducto CategoriasProducto  @relation(fields: [CategoriaId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "Productos_ibfk_1")
-  Usuarios           Usuarios?           @relation(fields: [UsuarioId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "Productos_ibfk_2")
-  Ventas             Ventas[]
-  Activo             Boolean             @default(dbgenerated("(b'0')")) @db.Bit(1)
+model productImage {
+  id                                Int       @id @default(autoincrement())
+  productId                         Int
+  imageUrl                          String    @db.VarChar(500)
+  altText                           String?   @db.VarChar(150)
+  orderImage                        Int       @db.SmallInt
+  active                            Boolean?  @default(true)
+  createdAt                         DateTime  @db.DateTime(0)
+  createdBy                         Int
+  updatedAt                         DateTime? @db.DateTime(0)
+  updatedBy                         Int?
+  product                           product   @relation(fields: [productId], references: [id], onUpdate: Restrict, map: "productImage_ibfk_1")
+  user_productImage_createdByTouser user      @relation("productImage_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "productImage_ibfk_2")
+  user_productImage_updatedByTouser user?     @relation("productImage_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "productImage_ibfk_3")
 
-  @@index([CategoriaId], map: "CategoriaId")
-  @@index([UsuarioId], map: "UsuarioId")
+  @@index([createdBy], map: "createdBy")
+  @@index([productId], map: "productId")
+  @@index([updatedBy], map: "updatedBy")
 }
 
-model Proveedores {
-  Id      Int       @id @default(autoincrement()) @db.SmallInt
-  Nombre  String    @db.VarChar(500)
-  Compras Compras[]
+model productPrice {
+  id                                Int              @id @default(autoincrement())
+  priceListId                       Int?
+  productId                         Int
+  unitOfMeasureId                   Int              @db.SmallInt
+  unitCost                          Decimal?         @db.Decimal(10, 2)
+  profitMargin                      Decimal?         @db.Decimal(10, 2)
+  unitPrice                         Decimal?         @db.Decimal(10, 2)
+  quantity                          Int?
+  active                            Boolean?         @default(true)
+  createdAt                         DateTime         @db.DateTime(0)
+  createdBy                         Int
+  updatedAt                         DateTime?        @db.DateTime(0)
+  updatedBy                         Int?
+  poDetail                          poDetail[]
+  product                           product          @relation(fields: [productId], references: [id], onUpdate: Restrict, map: "productPrice_ibfk_1")
+  unitOfMeasure                     unitOfMeasure    @relation(fields: [unitOfMeasureId], references: [id], onUpdate: Restrict, map: "productPrice_ibfk_2")
+  priceList                         priceList?       @relation(fields: [priceListId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "productPrice_ibfk_3")
+  user_productPrice_createdByTouser user             @relation("productPrice_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "productPrice_ibfk_4")
+  user_productPrice_updatedByTouser user?            @relation("productPrice_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "productPrice_ibfk_5")
+  purchaseDetail                    purchaseDetail[]
+  saleDetail                        saleDetail[]
+
+  @@index([createdBy], map: "createdBy")
+  @@index([updatedBy], map: "updatedBy")
+  @@index([priceListId], map: "priceListId")
+  @@index([productId], map: "productId")
+  @@index([unitOfMeasureId], map: "unitOfMeasureId")
 }
 
-model RolesUSuario {
-  Id       Int        @id @default(autoincrement()) @db.SmallInt
-  Nombre   String     @db.VarChar(500)
-  Usuarios Usuarios[]
+model purchase {
+  id                            Int              @id @default(autoincrement())
+  investmentId                  Int?
+  folio                         String           @db.VarChar(100)
+  subtotal                      Decimal          @db.Decimal(10, 2)
+  total                         Decimal          @db.Decimal(10, 2)
+  purchaseDate                  DateTime         @db.DateTime(0)
+  createdAt                     DateTime         @db.DateTime(0)
+  createdBy                     Int
+  updatedAt                     DateTime?        @db.DateTime(0)
+  updatedBy                     Int?
+  user_purchase_createdByTouser user             @relation("purchase_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "purchase_ibfk_1")
+  user_purchase_updatedByTouser user?            @relation("purchase_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "purchase_ibfk_2")
+  investment                    investment?      @relation(fields: [investmentId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "purchase_ibfk_3")
+  purchaseDetail                purchaseDetail[]
+
+  @@index([createdBy], map: "purchase_ibfk_1")
+  @@index([updatedBy], map: "purchase_ibfk_2")
+  @@index([investmentId], map: "purchase_ibfk_3")
 }
 
-model TiposCompra {
-  Id      Int       @id @default(autoincrement()) @db.SmallInt
-  Code    String    @db.VarChar(250)
-  Nombre  String    @db.VarChar(250)
-  Compras Compras[]
+model purchaseDetail {
+  id                                  Int           @id @default(autoincrement())
+  purchaseId                          Int
+  productPriceId                      Int?
+  expenseId                           Int?
+  supplierId                          Int?          @db.SmallInt
+  quantity                            Int
+  amountReceived                      Int
+  unitCost                            Decimal       @db.Decimal(10, 2)
+  subtotal                            Decimal       @db.Decimal(10, 2)
+  createdAt                           DateTime      @db.DateTime(0)
+  createdBy                           Int
+  updatedAt                           DateTime?     @db.DateTime(0)
+  updatedBy                           Int?
+  purchase                            purchase      @relation(fields: [purchaseId], references: [id], onUpdate: Restrict, map: "purchaseDetail_ibfk_1")
+  expense                             expense?      @relation(fields: [expenseId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "purchaseDetail_ibfk_3")
+  user_purchaseDetail_createdByTouser user          @relation("purchaseDetail_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "purchaseDetail_ibfk_5")
+  user_purchaseDetail_updatedByTouser user?         @relation("purchaseDetail_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "purchaseDetail_ibfk_6")
+  supplier                            supplier?     @relation(fields: [supplierId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "purchaseDetail_ibfk_7")
+  productPrice                        productPrice? @relation(fields: [productPriceId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "purchaseDetail_ibfk_8")
+
+  @@index([expenseId], map: "expenseId")
+  @@index([purchaseId], map: "purchaseId")
+  @@index([createdBy], map: "purchaseDetail_ibfk_4")
+  @@index([updatedBy], map: "purchaseDetail_ibfk_5")
+  @@index([supplierId], map: "purchaseDetail_ibfk_6")
+  @@index([productPriceId], map: "purchaseDetail_ibfk_7")
 }
 
-model UnidadesMedida {
-  Id              Int               @id @default(autoincrement()) @db.SmallInt
-  Code            String            @db.VarChar(250)
-  Nombre          String?           @db.VarChar(500)
-  ListasPrecios   ListasPrecios[]
-  PreciosProducto PreciosProducto[]
+model role {
+  id   Int    @id @default(autoincrement()) @db.SmallInt
+  code String @db.VarChar(20)
+  name String @db.VarChar(50)
+  user user[]
 }
 
-model Usuarios {
-  Id                                                            Int               @id @default(autoincrement()) @db.SmallInt
-  Nombre                                                        String            @db.VarChar(250)
-  RoleId                                                        Int?              @db.SmallInt
-  UsuariosLeier                                                 Boolean?          @default(dbgenerated("(b'0')")) @db.Bit(1)
-  Contrase_a                                                    String?           @map("Contraseña") @db.VarChar(500)
-  CreadoFecha                                                   DateTime          @db.DateTime(0)
-  Telefono                                                      String?           @db.VarChar(20)
-  Almacenes_Almacenes_UsuarioIdToUsuarios                       Almacenes[]       @relation("Almacenes_UsuarioIdToUsuarios")
-  Almacenes_Almacenes_ModificadoPorToUsuarios                   Almacenes[]       @relation("Almacenes_ModificadoPorToUsuarios")
-  Inventario                                                    Inventario[]
-  PreciosProducto_PreciosProducto_CreadoUsuarioIdToUsuarios     PreciosProducto[] @relation("PreciosProducto_CreadoUsuarioIdToUsuarios")
-  PreciosProducto_PreciosProducto_ModificadoUsuarioIdToUsuarios PreciosProducto[] @relation("PreciosProducto_ModificadoUsuarioIdToUsuarios")
-  Productos                                                     Productos[]
-  RolesUSuario                                                  RolesUSuario?     @relation(fields: [RoleId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "Usuarios_ibfk_1")
-  Correo                                                        String?           @db.VarChar(250)
+model sale {
+  id                        Int            @id @default(autoincrement())
+  folio                     String         @db.VarChar(150)
+  poId                      Int?
+  customerId                Int?
+  paymentMethodId           Int?           @db.SmallInt
+  totalAmount               Decimal        @db.Decimal(10, 2)
+  statusSaleId              Int            @db.SmallInt
+  createdAt                 DateTime       @db.DateTime(0)
+  createdBy                 Int
+  updatedAt                 DateTime?      @db.DateTime(0)
+  updatedBy                 Int?
+  po                        po?            @relation(fields: [poId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "sale_ibfk_1")
+  customer                  customer?      @relation(fields: [customerId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "sale_ibfk_2")
+  paymentMethod             paymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "sale_ibfk_3")
+  statusSale                statusSale     @relation(fields: [statusSaleId], references: [id], onUpdate: Restrict, map: "sale_ibfk_4")
+  user_sale_createdByTouser user           @relation("sale_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "sale_ibfk_5")
+  user_sale_updatedByTouser user?          @relation("sale_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "sale_ibfk_6")
+  saleDetail                saleDetail[]
 
-  @@index([RoleId], map: "RoleId")
+  @@index([createdBy], map: "createdBy")
+  @@index([customerId], map: "customerId")
+  @@index([paymentMethodId], map: "paymentMethodId")
+  @@index([poId], map: "poId")
+  @@index([statusSaleId], map: "statusSaleId")
+  @@index([updatedBy], map: "updatedBy")
 }
 
-model Ventas {
-  Id            Int         @id @default(autoincrement()) @db.SmallInt
-  Folio         String      @db.VarChar(250)
-  ProductoId    Int         @db.SmallInt
-  Cantidad      Int
-  ClienteId     Int?        @db.SmallInt
-  MetodoPagoId  Int         @db.SmallInt
-  Pagado        Boolean     @default(dbgenerated("(b'0')")) @db.Bit(1)
-  FechaPago     DateTime?   @db.DateTime(0)
-  Observaciones String?     @db.VarChar(500)
-  CreadoFecha   DateTime    @db.DateTime(0)
-  Productos     Productos   @relation(fields: [ProductoId], references: [Id], onUpdate: Restrict, map: "Ventas_ibfk_1")
-  Clientes      Clientes?   @relation(fields: [ClienteId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "Ventas_ibfk_2")
-  MetodosPago   MetodosPago @relation(fields: [MetodoPagoId], references: [Id], onUpdate: Restrict, map: "Ventas_ibfk_3")
+model statusPo {
+  id                            Int       @id @default(autoincrement()) @db.SmallInt
+  code                          String    @db.VarChar(50)
+  name                          Int
+  createdAt                     DateTime  @db.DateTime(0)
+  createdBy                     Int
+  updatedAt                     DateTime? @db.DateTime(0)
+  updatedBy                     Int?
+  po                            po[]
+  user_statusPo_createdByTouser user      @relation("statusPo_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "statusPo_ibfk_1")
+  user_statusPo_updatedByTouser user?     @relation("statusPo_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "statusPo_ibfk_2")
 
-  @@index([ClienteId], map: "ClienteId")
-  @@index([MetodoPagoId], map: "MetodoPagoId")
-  @@index([ProductoId], map: "ProductoId")
+  @@index([createdBy], map: "createdBy")
+  @@index([updatedBy], map: "updatedBy")
+}
+
+model statusSale {
+  id                              Int       @id @default(autoincrement()) @db.SmallInt
+  code                            String    @db.VarChar(50)
+  name                            String    @db.VarChar(150)
+  createdAt                       DateTime  @db.DateTime(0)
+  createdBy                       Int
+  updatedAt                       DateTime? @db.DateTime(0)
+  updatedBy                       Int?
+  sale                            sale[]
+  user_statusSale_createdByTouser user      @relation("statusSale_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "statusSale_ibfk_1")
+  user_statusSale_updatedByTouser user?     @relation("statusSale_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "statusSale_ibfk_2")
+
+  @@index([createdBy], map: "createdBy")
+  @@index([updatedBy], map: "updatedBy")
+}
+
+model supplier {
+  id                            Int              @id @default(autoincrement()) @db.SmallInt
+  name                          String           @db.VarChar(150)
+  phone                         String?          @db.VarChar(20)
+  email                         String?          @db.VarChar(150)
+  address                       String?          @db.VarChar(255)
+  active                        Boolean?         @default(true)
+  createdAt                     DateTime         @db.DateTime(0)
+  createdBy                     Int
+  updatedAt                     DateTime?        @db.DateTime(0)
+  updatedBy                     Int?
+  priceList                     priceList[]
+  purchaseDetail                purchaseDetail[]
+  user_supplier_createdByTouser user             @relation("supplier_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "supplier_ibfk_1")
+  user_supplier_updatedByTouser user?            @relation("supplier_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "supplier_ibfk_2")
+
+  @@index([createdBy], map: "createdBy")
+  @@index([updatedBy], map: "updatedBy")
+}
+
+model unitOfMeasure {
+  id                                 Int              @id @default(autoincrement()) @db.SmallInt
+  code                               String           @db.VarChar(50)
+  name                               String           @db.VarChar(150)
+  active                             Boolean?         @default(true)
+  createdAt                          DateTime         @db.DateTime(0)
+  createdBy                          Int
+  updatedAt                          DateTime?        @db.DateTime(0)
+  updatedBy                          Int?
+  productPrice                       productPrice[]
+  user_unitOfMeasure_createdByTouser user             @relation("unitOfMeasure_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "unitOfMeasure_ibfk_1")
+  user_unitOfMeasure_updatedByTouser user?            @relation("unitOfMeasure_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "unitOfMeasure_ibfk_2")
+  warehouseStock                     warehouseStock[]
+
+  @@index([createdBy], map: "createdBy")
+  @@index([updatedBy], map: "updatedBy")
+}
+
+model user {
+  id                                            Int              @id @default(autoincrement())
+  name                                          String           @db.VarChar(150)
+  roleId                                        Int?             @db.SmallInt
+  userLeier                                     Boolean          @default(dbgenerated("(b'0')")) @db.Bit(1)
+  password                                      String           @db.VarChar(2000)
+  phone                                         String?          @db.VarChar(20)
+  email                                         String?          @db.VarChar(150)
+  active                                        Boolean
+  createdAt                                     DateTime         @db.DateTime(0)
+  createdBy                                     Int?             @map(" createdBy")
+  updatedAt                                     DateTime?        @db.DateTime(0)
+  updatedBy                                     Int?
+  category_category_createdByTouser             category[]       @relation("category_createdByTouser")
+  category_category_updatedByTouser             category[]       @relation("category_updatedByTouser")
+  categoryType_categoryType_createdByTouser     categoryType[]   @relation("categoryType_createdByTouser")
+  categoryType_categoryType_updatedByTouser     categoryType[]   @relation("categoryType_updatedByTouser")
+  customer_customer_createdByTouser             customer[]       @relation("customer_createdByTouser")
+  customer_customer_updatedByTouser             customer[]       @relation("customer_updatedByTouser")
+  expense_expense_createdByTouser               expense[]        @relation("expense_createdByTouser")
+  expense_expense_updatedByTouser               expense[]        @relation("expense_updatedByTouser")
+  expenseType_expenseType_createdByTouser       expenseType[]    @relation("expenseType_createdByTouser")
+  expenseType_expenseType_updatedByTouser       expenseType[]    @relation("expenseType_updatedByTouser")
+  investment_investment_createdByTouser         investment[]     @relation("investment_createdByTouser")
+  investment_investment_updatedByTouser         investment[]     @relation("investment_updatedByTouser")
+  paymentMethod_paymentMethod_createdByTouser   paymentMethod[]  @relation("paymentMethod_createdByTouser")
+  paymentMethod_paymentMethod_updatedByTouser   paymentMethod[]  @relation("paymentMethod_updatedByTouser")
+  po_po_createdByTouser                         po[]             @relation("po_createdByTouser")
+  po_po_updatedByTouser                         po[]             @relation("po_updatedByTouser")
+  poDetail_poDetail_createdByTouser             poDetail[]       @relation("poDetail_createdByTouser")
+  poDetail_poDetail_updatedByTouser             poDetail[]       @relation("poDetail_updatedByTouser")
+  priceList_priceList_createdByTouser           priceList[]      @relation("priceList_createdByTouser")
+  priceList_priceList_updatedByTouser           priceList[]      @relation("priceList_updatedByTouser")
+  product_product_createdByTouser               product[]        @relation("product_createdByTouser")
+  product_product_updatedByTouser               product[]        @relation("product_updatedByTouser")
+  productImage_productImage_createdByTouser     productImage[]   @relation("productImage_createdByTouser")
+  productImage_productImage_updatedByTouser     productImage[]   @relation("productImage_updatedByTouser")
+  productPrice_productPrice_createdByTouser     productPrice[]   @relation("productPrice_createdByTouser")
+  productPrice_productPrice_updatedByTouser     productPrice[]   @relation("productPrice_updatedByTouser")
+  purchase_purchase_createdByTouser             purchase[]       @relation("purchase_createdByTouser")
+  purchase_purchase_updatedByTouser             purchase[]       @relation("purchase_updatedByTouser")
+  purchaseDetail_purchaseDetail_createdByTouser purchaseDetail[] @relation("purchaseDetail_createdByTouser")
+  purchaseDetail_purchaseDetail_updatedByTouser purchaseDetail[] @relation("purchaseDetail_updatedByTouser")
+  sale_sale_createdByTouser                     sale[]           @relation("sale_createdByTouser")
+  sale_sale_updatedByTouser                     sale[]           @relation("sale_updatedByTouser")
+  saleDetail_saleDetail_createdByTouser         saleDetail[]     @relation("saleDetail_createdByTouser")
+  saleDetail_saleDetail_updatedByTouser         saleDetail[]     @relation("saleDetail_updatedByTouser")
+  statusPo_statusPo_createdByTouser             statusPo[]       @relation("statusPo_createdByTouser")
+  statusPo_statusPo_updatedByTouser             statusPo[]       @relation("statusPo_updatedByTouser")
+  statusSale_statusSale_createdByTouser         statusSale[]     @relation("statusSale_createdByTouser")
+  statusSale_statusSale_updatedByTouser         statusSale[]     @relation("statusSale_updatedByTouser")
+  supplier_supplier_createdByTouser             supplier[]       @relation("supplier_createdByTouser")
+  supplier_supplier_updatedByTouser             supplier[]       @relation("supplier_updatedByTouser")
+  unitOfMeasure_unitOfMeasure_createdByTouser   unitOfMeasure[]  @relation("unitOfMeasure_createdByTouser")
+  unitOfMeasure_unitOfMeasure_updatedByTouser   unitOfMeasure[]  @relation("unitOfMeasure_updatedByTouser")
+  role                                          role?            @relation(fields: [roleId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "user_ibfk_1")
+  warehouse_warehouse_createdByTouser           warehouse[]      @relation("warehouse_createdByTouser")
+  warehouse_warehouse_updatedByTouser           warehouse[]      @relation("warehouse_updatedByTouser")
+  warehouseStock_warehouseStock_createdByTouser warehouseStock[] @relation("warehouseStock_createdByTouser")
+  warehouseStock_warehouseStock_updatedByTouser warehouseStock[] @relation("warehouseStock_updatedByTouser")
+
+  @@index([roleId], map: "roleId")
+}
+
+model warehouse {
+  id                             Int              @id @default(autoincrement()) @db.SmallInt
+  code                           String           @db.VarChar(50)
+  name                           String           @db.VarChar(150)
+  location                       String           @db.VarChar(255)
+  active                         Boolean?         @default(true)
+  createdAt                      DateTime         @db.DateTime(0)
+  createdBy                      Int
+  updatedAt                      DateTime?        @db.DateTime(0)
+  updatedBy                      Int?
+  po                             po[]
+  user_warehouse_createdByTouser user             @relation("warehouse_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "warehouse_ibfk_1")
+  user_warehouse_updatedByTouser user?            @relation("warehouse_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "warehouse_ibfk_2")
+  warehouseStock                 warehouseStock[]
+
+  @@index([createdBy], map: "createdBy")
+  @@index([updatedBy], map: "updatedBy")
+}
+
+model warehouseStock {
+  id                                  Int           @id @default(autoincrement())
+  warehouseId                         Int           @db.SmallInt
+  productId                           Int?
+  expenseId                           Int?
+  unitOfMeasureId                     Int           @db.SmallInt
+  quantity                            Int
+  active                              Boolean?      @default(true)
+  createdAt                           DateTime      @db.DateTime(0)
+  createdBy                           Int
+  updatedAt                           DateTime?     @db.DateTime(0)
+  updatedBy                           Int?
+  warehouse                           warehouse     @relation(fields: [warehouseId], references: [id], onUpdate: Restrict, map: "warehouseStock_ibfk_1")
+  product                             product?      @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "warehouseStock_ibfk_2")
+  expense                             expense?      @relation(fields: [expenseId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "warehouseStock_ibfk_3")
+  unitOfMeasure                       unitOfMeasure @relation(fields: [unitOfMeasureId], references: [id], onUpdate: Restrict, map: "warehouseStock_ibfk_4")
+  user_warehouseStock_createdByTouser user          @relation("warehouseStock_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "warehouseStock_ibfk_5")
+  user_warehouseStock_updatedByTouser user?         @relation("warehouseStock_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "warehouseStock_ibfk_6")
+
+  @@index([createdBy], map: "createdBy")
+  @@index([expenseId], map: "expenseId")
+  @@index([productId], map: "productId")
+  @@index([unitOfMeasureId], map: "unitOfMeasureId")
+  @@index([updatedBy], map: "updatedBy")
+  @@index([warehouseId], map: "warehouseId")
+}
+
+model investment {
+  id                              Int        @id @default(autoincrement())
+  amount                          Decimal    @db.Decimal(10, 2)
+  description                     String?    @db.VarChar(255)
+  investmentDate                  DateTime   @default(now()) @db.DateTime(0)
+  createdAt                       DateTime   @default(now()) @db.DateTime(0)
+  createdBy                       Int
+  updatedAt                       DateTime?  @db.DateTime(0)
+  updatedBy                       Int?
+  user_investment_createdByTouser user       @relation("investment_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "investment_ibfk_1")
+  user_investment_updatedByTouser user?      @relation("investment_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "investment_ibfk_2")
+  purchase                        purchase[]
+
+  @@index([createdBy], map: "createdBy")
+  @@index([updatedBy], map: "updatedBy")
+}
+
+model saleDetail {
+  id                              Int          @id @default(autoincrement())
+  saleId                          Int
+  productPriceId                  Int
+  quantity                        Int
+  unitPrice                       Decimal      @db.Decimal(10, 2)
+  subtotal                        Decimal      @db.Decimal(10, 2)
+  createdAt                       DateTime     @db.DateTime(0)
+  createdBy                       Int
+  updatedAt                       DateTime?    @db.DateTime(0)
+  updatedBy                       Int?
+  sale                            sale         @relation(fields: [saleId], references: [id], onUpdate: Restrict, map: "saleDetail_ibfk_1")
+  productPrice                    productPrice @relation(fields: [productPriceId], references: [id], onUpdate: Restrict, map: "saleDetail_ibfk_2")
+  user_saleDetail_createdByTouser user         @relation("saleDetail_createdByTouser", fields: [createdBy], references: [id], onUpdate: Restrict, map: "saleDetail_ibfk_3")
+  user_saleDetail_updatedByTouser user?        @relation("saleDetail_updatedByTouser", fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "saleDetail_ibfk_4")
+
+  @@index([createdBy], map: "createdBy")
+  @@index([productPriceId], map: "productPriceId")
+  @@index([saleId], map: "saleId")
+  @@index([updatedBy], map: "updatedBy")
 }

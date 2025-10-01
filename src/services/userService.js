@@ -1,13 +1,14 @@
 const {PrismaClient} = require('@prisma/client');
 const prisma = new PrismaClient();
 
-exports.getUser = (correo)=>{
-    return prisma.usuarios.findMany({
+exports.getUser = (email)=>{
+    return prisma.user.findMany({
         select: {
-            Nombre: true,
-            Correo: true,
-            Telefono: true,
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
         },
-        where: {Correo: correo}
+        where: {email: email}
     });
     };

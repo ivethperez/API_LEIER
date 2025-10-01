@@ -4,6 +4,6 @@ const authenticateToken = require('../middlewares/auth');
 
 const router = Router();
 
-router.get('/:Correo', authenticateToken, userController.getUser);
+router.get('/:email', authenticateToken, userController.getUser);
 
 module.exports = router;

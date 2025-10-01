@@ -3,34 +3,38 @@ const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const registerUser = async (Nombre, Contrase_a, Telefono) => {
-  const hashedPassword = await bcrypt.hash(Contrase_a, 10);
-  const newUser = await prisma.usuarios.create({
+const registerUser = async (name, password, phone, email) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const newUser = await prisma.user.create({
     data: { 
-        Nombre,
-        Contrase_a : hashedPassword, 
-        RoleId:1,
-        CreadoFecha : new Date(),
-        Telefono }
+        name,
+        password : hashedPassword, 
+        roleId:1,
+        userLeier:false,
+        phone,
+        email,
+        active:true,
+        createdAt : new Date() }
   });
   return newUser;
 };
 
-const loginUser = async (Correo, Contrase_a) => {
-  const user = await prisma.Usuarios.findFirst({ where: { Correo } });
+const loginUser = async (email, password) => {
+  const user = await prisma.user.findFirst({ where: { email } });
   if (!user) {
     throw new Error('Invalido correo o contraseña');
   }
-  const validPassword = await bcrypt.compare(Contrase_a, user.Contrase_a);
+  const validPassword = await bcrypt.compare(password, user.password);
   if (!validPassword) {
     throw new Error('Invalido correo o contraseña');
   }
   const token = jwt.sign(
-    { id: user.id, role: user.role },
+    { id: user.id, role: user.roleId },
     process.env.JWT_SECRET,
     { expiresIn: '4h' }
   );
   return token;
+
 };
 
 module.exports = { registerUser, loginUser };

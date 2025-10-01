@@ -2,7 +2,7 @@ const userService = require('../services/userService');
 
 exports.getUser = async (req, res) => {
     try {
-        const user = await userService.getUser(req.params.Correo);
+        const user = await userService.getUser(req.params.email);
         if (!user) {
             return res.status(404).json({ error: 'User not fount' });
         }
