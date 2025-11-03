@@ -7,7 +7,7 @@ const router = Router();
 router.post('/', authenticateToken, salesController.createSale);
 router.get('/:id', authenticateToken, salesController.getSale);
 router.get('/', authenticateToken, salesController.getSales);
-router.get("/statusSale", salesController.getStatusSale);
+router.get("/statusSale/:active", authenticateToken,salesController.getStatusSale);
 router.put('/:id', authenticateToken, salesController.updateSale);
 router.delete('/:id', authenticateToken, salesController.deleteSale);
 

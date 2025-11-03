@@ -1,73 +1,14 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-exports.createSale = async data => {
-    return prisma.sale.create({ data });
+exports.createPurchaseOrder = async data => {
+    return prisma.purchase.create({ data });
 }
 
-exports.getSale = (id) => {
-    return prisma.sale.findUnique({
+exports.getPurchaseOrder = (id) => {
+    return prisma.purchase.findUnique({
         where: { id: parseInt(id, 10) },
-        select: {
-            id: true,
-            folio: true,
-            totalAmount: true,
-            customer: {
-                select: {
-                    id: true
-                }
-            },
-            paymentMethod: {
-                select: {
-                    id: true
-                }
-            },
-            statusSale: {
-                select: {
-                    id: true
-                }
-            },
-            po: {
-                select: {
-                    id: true
-                }
-            },
-            saleDetail: {
-                select: {
-                    id: true,
-                    quantity: true,
-                    unitPrice: true,
-                    subtotal: true,
-                    productPrice: {
-                        select: {
-                            id: true,
-                            product: {
-                                select: {
-                                    id: true,
-                                    name: true,
-                                    description: true
-                                }
-                            },
-                            unitOfMeasure: {
-                                select: {
-                                    id: true,
-                                    name: true
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-    });
-};
-
-exports.getSales = async => {
-    return prisma.sale.findMany({
-        select: {
-            id: true,
-            folio: true,
-            totalAmount: true,
+        include: {
             customer: {
                 select: {
                     id: true,
@@ -80,20 +21,88 @@ exports.getSales = async => {
             paymentMethod: {
                 select: {
                     id: true,
+                    code: true,
                     name: true
                 }
             },
-            statusSale: {
+            statuspurchase: {
                 select: {
                     id: true,
                     code: true,
                     name: true
                 }
             },
-            po: {
+            warehouse: {
                 select: {
                     id: true,
-                    folio: true
+                    code: true,
+                    name: true,
+                    location: true
+                }
+            },
+            purchaseDetail: {
+                include: {
+                    productPrice: {
+                        include: {
+                            product: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    description: true
+                                }
+                            },
+                            unitOfMeasure: {
+                                select: {
+                                    id: true,
+                                    code: true,
+                                    name: true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+};
+
+exports.getPurchaseOrders = async () => {
+    return prisma.purchase.findMany({
+        select: {
+            id: true,
+            folio: true,
+            totalAmount: true,
+            orderDate: true,
+            deliveryDate: true,
+            createdAt: true,
+            customer: {
+                select: {
+                    id: true,
+                    name: true,
+                    lastName: true,
+                    phone: true,
+                    email: true
+                }
+            },
+            paymentMethod: {
+                select: {
+                    id: true,
+                    code: true,
+                    name: true
+                }
+            },
+            statusPo: {
+                select: {
+                    id: true,
+                    code: true,
+                    name: true
+                }
+            },
+            warehouse: {
+                select: {
+                    id: true,
+                    code: true,
+                    name: true
                 }
             }
         },
@@ -103,8 +112,8 @@ exports.getSales = async => {
     });
 };
 
-exports.getStatusSale = async => {
-    return prisma.statusSale.findMany({
+exports.getStatusPo = async () => {
+    return prisma.statusPo.findMany({
         select: {
             id: true,
             code: true,
@@ -113,23 +122,17 @@ exports.getStatusSale = async => {
     });
 };
 
-exports.updateSale = async (id, data) => {
-    const { customerId, paymentMethodId, statusSaleId } = data;
-    return prisma.sale.update({
+exports.updatePurchaseOrder = async (id, data) => {
+    return prisma.purchase.update({
         where: {
             id: parseInt(id, 10),
         },
-        data: {
-            ...(customerId && { customerId: parseInt(customerId, 10) }),
-            ...(paymentMethodId && { paymentMethodId: parseInt(paymentMethodId, 10) }),
-            ...(statusSaleId && { statusSaleId: parseInt(statusSaleId, 10) }),
-          }
+        data
     });
 };
 
-
-exports.deleteSale = (id) => {
-    return prisma.sale.delete({
+exports.deletePurchaseOrder = (id) => {
+    return prisma.purchase.delete({
         where: {
             id: Number(id)
         }

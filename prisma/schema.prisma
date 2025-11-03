@@ -359,7 +359,8 @@ model sale {
 model statusPo {
   id                            Int       @id @default(autoincrement()) @db.SmallInt
   code                          String    @db.VarChar(50)
-  name                          Int
+  name                          String    @db.VarChar(250)
+  active                        Boolean?
   createdAt                     DateTime  @db.DateTime(0)
   createdBy                     Int
   updatedAt                     DateTime? @db.DateTime(0)
@@ -376,6 +377,7 @@ model statusSale {
   id                              Int       @id @default(autoincrement()) @db.SmallInt
   code                            String    @db.VarChar(50)
   name                            String    @db.VarChar(150)
+  active                          Boolean?
   createdAt                       DateTime  @db.DateTime(0)
   createdBy                       Int
   updatedAt                       DateTime? @db.DateTime(0)

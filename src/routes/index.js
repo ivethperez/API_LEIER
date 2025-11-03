@@ -8,6 +8,9 @@ const productImages = require('./productImages');
 const customers = require('./customers');
 const sales = require('./sales');
 const paymentMethods = require('./paymentMethods');
+const purchaseOrders = require('./purchaseOrders');
+const orders = require('./orders');
+const saleDetails = require('./saleDetails');
 
 const router = Router();
 
@@ -20,5 +23,8 @@ router.use('/productImages', productImages);
 router.use('/customers', customers);
 router.use('/sales', sales);
 router.use('/paymentMethods', paymentMethods);
+router.use('/purchaseOrders', purchaseOrders);
+router.use('/orders', orders);
+router.use('/saleDetails', saleDetails);
 
 module.exports = router;
