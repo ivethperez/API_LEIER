@@ -8,7 +8,6 @@ exports.createCustomer = async (req, res) => {
         res.status(201).json(customer);
     }
     catch (error) {
-        console.log(error.message)
         res.status(400).json({ error: error.message });
     }
 }
@@ -48,14 +47,13 @@ exports.updateCustomer = async (req, res) => {
         res.json(customer);
     }
     catch (error) {
-        console.log(error.message)
         return res.status(400).json({ error: error.message });
     }
 }
 
 exports.deleteCustomer = async (req, res) => {
     try {
-        const customer = await customerService.deleteCustomer(req.params.id);
+        const customer = await customerService.deleteCustomer(req.params.id);      
         if (!customer) {
             return res.status(404).json({ error: 'Customer not found' });
         }

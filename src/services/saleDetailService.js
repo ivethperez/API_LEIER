@@ -14,6 +14,7 @@ exports.getSaleDetail = (id) => {
                     id: true,
                     folio: true,
                     totalAmount: true,
+                    saleDate: true,
                     createdAt: true
                 }
             },

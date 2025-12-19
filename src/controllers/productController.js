@@ -42,12 +42,12 @@ exports.updateProduct = async (req, res) => {
             req.params.id,
             req.body);
         if (!product) {
-            return res.status(404).json({ error: 'Product not fount' });
+            return res.status(404).json({ message: 'Product not fount' });
         }
         res.json(product);
     }
     catch (error) {
-        return res.status(400).json({ error: error.message });
+        return res.status(400).json({message: error.message});
     }
 }
 

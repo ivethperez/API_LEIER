@@ -30,20 +30,10 @@ exports.getProducts = async =>{
     };
 
 exports.updateProduct = async(id,data) =>{
-    const conflict = prisma.product.findFirst({
-        where:{
-            Id: {not: parseInt(id,10)},
-            Nombre: data.Nombre
-        }
-    });
-    if(conflict){
-        throw new Error('El producto ya se encuentra registrado');
-    }
     return prisma.product.update({
         where:{
-            Id: parseInt(id,10),
-            data
-        }
+            id: parseInt(id,10)
+        }, data
     });
 };
 

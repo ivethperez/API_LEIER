@@ -8,7 +8,6 @@ exports.createPurchaseOrder = async (req, res) => {
         res.status(201).json(purchaseOrder);
     }
     catch (error) {
-        console.log(error.message)
         res.status(400).json({ error: error.message });
     }
 }
@@ -59,7 +58,6 @@ exports.updatePurchaseOrder = async (req, res) => {
         res.json(purchaseOrder);
     }
     catch (error) {
-        console.log(error.message)
         return res.status(400).json({ error: error.message });
     }
 }

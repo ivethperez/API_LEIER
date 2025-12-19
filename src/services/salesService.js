@@ -12,6 +12,7 @@ exports.getSale = (id) => {
             id: true,
             folio: true,
             totalAmount: true,
+            saleDate: true,
             customer: {
                 select: {
                     id: true
@@ -68,6 +69,7 @@ exports.getSales = async => {
             id: true,
             folio: true,
             totalAmount: true,
+            saleDate: true,
             customer: {
                 select: {
                     id: true,
@@ -114,7 +116,7 @@ exports.getStatusSale = async => {
 };
 
 exports.updateSale = async (id, data) => {
-    const { customerId, paymentMethodId, statusSaleId } = data;
+    const { customerId, paymentMethodId, statusSaleId, saleDate } = data;
     return prisma.sale.update({
         where: {
             id: parseInt(id, 10),
@@ -123,6 +125,7 @@ exports.updateSale = async (id, data) => {
             ...(customerId && { customerId: parseInt(customerId, 10) }),
             ...(paymentMethodId && { paymentMethodId: parseInt(paymentMethodId, 10) }),
             ...(statusSaleId && { statusSaleId: parseInt(statusSaleId, 10) }),
+            ...(saleDate && { saleDate: new Date(saleDate) })
           }
     });
 };

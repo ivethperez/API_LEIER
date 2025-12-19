@@ -298,6 +298,7 @@ model purchaseDetail {
   productPriceId                      Int?
   expenseId                           Int?
   supplierId                          Int?          @db.SmallInt
+  description                         String?       @db.VarChar(500)
   quantity                            Int
   amountReceived                      Int
   unitCost                            Decimal       @db.Decimal(10, 2)
@@ -336,6 +337,7 @@ model sale {
   paymentMethodId           Int?           @db.SmallInt
   totalAmount               Decimal        @db.Decimal(10, 2)
   statusSaleId              Int            @db.SmallInt
+  saleDate                  DateTime       @db.DateTime(0)
   createdAt                 DateTime       @db.DateTime(0)
   createdBy                 Int
   updatedAt                 DateTime?      @db.DateTime(0)

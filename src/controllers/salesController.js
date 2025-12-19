@@ -8,7 +8,6 @@ exports.createSale = async (req, res) => {
         res.status(201).json(sale);
     }
     catch (error) {
-        console.log(error.message)
         res.status(400).json({ error: error.message });
     }
 }
@@ -58,7 +57,6 @@ exports.updateSale = async (req, res) => {
         res.json(sale);
     }
     catch (error) {
-        console.log(error.message)
         return res.status(400).json({ error: error.message });
     }
 }

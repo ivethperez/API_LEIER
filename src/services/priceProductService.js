@@ -24,7 +24,6 @@ exports.getByProductAndUnit = (productId, unitOfMeasureId) => {
         where: { productId: parseInt(productId, 10), unitOfMeasureId : parseInt(unitOfMeasureId,10) }
     });
 };
-
 exports.getPriceProducts = async => {
     return prisma.productPrice.findMany({
         select: {
