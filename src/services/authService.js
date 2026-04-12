@@ -7,12 +7,12 @@ const registerUser = async (name, password, phone, email) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   const newUser = await prisma.user.create({
     data: { 
-        name,
+        name: name,
         password : hashedPassword, 
         roleId:1,
-        userLeier:false,
-        phone,
-        email,
+        userLeier:1,
+        phone:phone,
+        email: email,
         active:true,
         createdAt : new Date() }
   });

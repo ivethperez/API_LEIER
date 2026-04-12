@@ -5,7 +5,7 @@ const app = express();
 
 // Permitir solicitudes desde el frontend en localhost:5173
 app.use(cors({
-    origin: 'https://usuariosleier.snacksleier.com',
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
   }));
