@@ -3,7 +3,7 @@ const cors = require('cors');
 const routes = require('./routes');
 const app = express();
 
-// Permitir solicitudes desde el frontend en localhost:5173
+// Permitir solicitudes desde el frontend
 app.use(cors({
     origin: 'https://www.snacksleier.com',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
