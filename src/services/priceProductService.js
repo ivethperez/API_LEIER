@@ -64,6 +64,11 @@ exports.getPriceProducts = async => {
                 isPiece: "desc", // 👈 aquí ordenamos por isPiece descendente
             },
         },
+        where:{
+            unitOfMeasure:{active:true},
+            active: true, 
+            product: {active : true}
+        }
     });
 };
 
